@@ -1,13 +1,85 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>JetblueAssessment</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta charset="UTF-8">
+  <title>Booking Summary</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2em;
+      background-color: #f4f4f4;
+    }
+    .card {
+      background-color: #fff;
+      padding: 1.5em;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      max-width: 400px;
+    }
+    .card h2 {
+      margin-top: 0;
+    }
+    label {
+      display: block;
+      margin-top: 1em;
+    }
+    input {
+      width: 100%;
+      padding: 0.5em;
+      margin-top: 0.25em;
+    }
+    button {
+      margin-top: 1.5em;
+      padding: 0.5em 1em;
+      font-size: 1em;
+    }
+  </style>
 </head>
 <body>
-  <app-root></app-root>
+  <div class="card">
+    <h2>Booking Summary</h2>
+    <div id="booking-info">
+      <p><strong>Passenger:</strong> <span id="passengerName"></span></p>
+      <p><strong>Flight:</strong> <span id="flightNumber"></span></p>
+      <p><strong>From:</strong> <span id="departure"></span></p>
+      <p><strong>To:</strong> <span id="arrival"></span></p>
+      <label for="seat">Seat:</label>
+      <input id="seat" type="text" />
+      <label for="baggage">Baggage (comma-separated):</label>
+      <input id="baggage" type="text" />
+      <button onclick="updateBooking()">Update Booking</button>
+    </div>
+  </div>
+
+  <script>
+    const PNR = 'ABC123';
+    const API_URL = 'http://localhost:3000/api/bookings/' + PNR;
+
+    async function loadBooking() {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+      document.getElementById('passengerName').textContent = data.passengerName;
+      document.getElementById('flightNumber').textContent = data.flightNumber;
+      document.getElementById('departure').textContent = data.departure;
+      document.getElementById('arrival').textContent = data.arrival;
+      document.getElementById('seat').value = data.seat;
+      document.getElementById('baggage').value = data.baggage.join(', ');
+    }
+
+    async function updateBooking() {
+      const seat = document.getElementById('seat').value;
+      const baggage = document.getElementById('baggage').value.split(',').map(item => item.trim()).filter(Boolean);
+      const response = await fetch(API_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ seat, baggage })
+      });
+      const updated = await response.json();
+      alert('Booking updated successfully!');
+      console.log(updated);
+    }
+
+    loadBooking();
+  </script>
 </body>
 </html>
